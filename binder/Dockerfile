@@ -1,5 +1,5 @@
-FROM ros:noetic-ros-base-buster
-# FROM intel4coro/base-notebook:20.04-noetic-full-xpra
+# FROM ros:noetic-ros-base-buster
+FROM intel4coro/base-notebook:20.04-noetic-full-xpra
 
 SHELL ["/bin/bash", "-c"] 
 
@@ -14,23 +14,8 @@ RUN apt install -y nodejs npm
 USER ${NB_USER}
 # Install and set path for python dependencies
 ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/ros/devel/lib/python3/dist-packages:$PYTHONPATH
-RUN pip3 uninstall -y jlab-enhanced-cell-toolbar
-RUN pip3 install https://raw.githubusercontent.com/yxzhan/jupyterlab-rviz/master/dist/jupyterlab_rviz-0.3.2.tar.gz \
-  https://raw.githubusercontent.com/yxzhan/extension-examples/main/cell-toolbar/dist/jupyterlab_examples_cell_toolbar-0.1.4.tar.gz
-RUN mamba install -y ripgrep
-RUN pip3 install --upgrade \
-  sidecar \
-  Cython \
-  openai \
-  jupyterlab-git \
-  jupyterlab-unfold \
-  jupyter-archive \
-  jupyterlab-search-replace \
-  jupyter-offlinenotebook \
-  jupyter-collaboration \
-  jupyter-ai \
-  jupyterlab-language-pack-de-DE  \
-  jupyterlab_execute_time
+RUN pip3 install jupyter
+RUN pip3 install jupyterlab
 
 USER root
 # Install jupyter-ros
@@ -58,7 +43,7 @@ RUN wget https://raw.githubusercontent.com/sasjonge/jupyter-knowrob/master/kerne
 
 # We need the json_prolog_msgs to communicate with KnowRob
 WORKDIR /home/ros/src
-RUN python3 /opt/ros/noetic/bin/catkin_init_workspace
+RUN /usr/bin/python /opt/ros/noetic/bin/catkin_init_workspace
 RUN source /opt/ros/noetic/setup.bash
 RUN git clone https://github.com/code-iai/iai_common_msgs.git
 
