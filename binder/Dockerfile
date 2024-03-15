@@ -11,8 +11,21 @@ RUN apt install -y nodejs npm
 USER ${NB_USER}
 # Install and set path for python dependencies
 ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/ros/devel/lib/python3/dist-packages:$PYTHONPATH
-RUN pip3 install jupyter
-RUN pip3 install jupyterlab
+RUN pip install jupyter
+RUN pip install --upgrade \
+  sidecar \
+  Cython \
+  openai \
+  jupyterlab-git \
+  jupyterlab-unfold \
+  jupyter-archive \
+  jupyterlab-search-replace \
+  jupyter-offlinenotebook \
+  jupyter-collaboration \
+  jupyter-ai \
+  jupyterlab-language-pack-de-DE  \
+  jupyterlab_execute_time
+RUN pip install jupyterlab
 
 
 # Install jupyter-ros
@@ -22,8 +35,8 @@ RUN git clone https://github.com/RoboStack/jupyter-ros.git
 WORKDIR ${JUPYTER_ROS}/jupyter-ros
 # RUN sudo apt update
 # RUN sudo apt install -y nodejs npm
-RUN pip3 install -e .
-RUN pip3 install numpy --upgrade
+RUN pip install -e .
+RUN pip install numpy --upgrade
 RUN jupyter nbextension install --py --symlink --sys-prefix jupyros
 RUN jupyter nbextension enable --py --sys-prefix jupyros
 
@@ -31,7 +44,7 @@ RUN jupyter nbextension enable --py --sys-prefix jupyros
 RUN python3 -m pip install jupyterlab-zethus
 
 # Install Knowrob kernel 
-RUN pip3 install git+https://github.com/sasjonge/jupyter-knowrob.git
+RUN pip install git+https://github.com/sasjonge/jupyter-knowrob.git
 WORKDIR ~/.local/share/jupyter/kernels/
 USER root
 RUN mkdir jknowrob
