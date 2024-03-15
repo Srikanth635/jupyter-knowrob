@@ -56,6 +56,6 @@ RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 WORKDIR /lectures
 
 # Configure container startup
-# COPY run_notebook.sh /run_notebook.sh
-# COPY /knowrob_cloud /home/ros/src/knowrob_cloud
-# ENTRYPOINT ["/run_notebook.sh"]
+COPY binder/run_notebook.sh /run_notebook.sh
+COPY binder/knowrob_cloud /home/ros/src/knowrob_cloud
+ENTRYPOINT ["/run_notebook.sh"]
