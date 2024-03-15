@@ -34,10 +34,9 @@ RUN pip install --upgrade \
 
 USER root
 # Install jupyter-ros
-ENV JUPYTER_ROS = /home/${NB_USER}/workspace/jupyterros
-WORKDIR ${JUPYTER_ROS}
+WORKDIR /home/ros
 RUN git clone https://github.com/RoboStack/jupyter-ros.git
-WORKDIR ${JUPYTER_ROS}/jupyter-ros
+WORKDIR /home/ros/jupyter-ros
 # RUN sudo apt update
 # RUN sudo apt install -y nodejs npm
 RUN pip install -e .
@@ -58,12 +57,12 @@ USER ${NB_USER}
 RUN wget https://raw.githubusercontent.com/sasjonge/jupyter-knowrob/master/kernel.json -P ~/.local/share/jupyter/kernels/jknowrob
 
 # We need the json_prolog_msgs to communicate with KnowRob
-WORKDIR ${JUPYTER_ROS}/src
+WORKDIR /home/ros/src
 RUN /usr/bin/python /opt/ros/noetic/bin/catkin_init_workspace
 RUN source /opt/ros/noetic/setup.bash
 RUN git clone https://github.com/code-iai/iai_common_msgs.git
 
-WORKDIR ${JUPYTER_ROS}
+WORKDIR /home/ros
 # Build the catkin workspace
 ENV CMAKE_PREFIX_PATH=/home/${NB_USER}/knowrob_ws/devel:/opt/ros/noetic
 RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
