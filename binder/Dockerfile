@@ -12,20 +12,20 @@ USER ${NB_USER}
 # Install and set path for python dependencies
 ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/ros/devel/lib/python3/dist-packages:$PYTHONPATH
 RUN pip3 install jupyter
-RUN pip3 install --upgrade \
-  sidecar \
-  Cython \
-  openai \
-  jupyterlab-git \
-  jupyterlab-unfold \
-  jupyter-archive \
-  jupyterlab-search-replace \
-  jupyter-offlinenotebook \
-  jupyter-collaboration \
-  jupyter-ai \
-  jupyterlab-language-pack-de-DE  \
-  jupyterlab_execute_time
-RUN pip3 install jupyterlab
+# RUN pip3 install --upgrade \
+#   sidecar \
+#   Cython \
+#   openai \
+#   jupyterlab-git \
+#   jupyterlab-unfold \
+#   jupyter-archive \
+#   jupyterlab-search-replace \
+#   jupyter-offlinenotebook \
+#   jupyter-collaboration \
+#   jupyter-ai \
+#   jupyterlab-language-pack-de-DE  \
+#   jupyterlab_execute_time
+RUN pip3 install jupyterlab==4.0.0
 
 
 # Install jupyter-ros
