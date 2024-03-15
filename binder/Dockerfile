@@ -13,7 +13,7 @@ RUN apt install -y nodejs npm
 
 USER ${NB_USER}
 # Install and set path for python dependencies
-# ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/ros/devel/lib/python3/dist-packages:$PYTHONPATH
+ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/${NB_USER}/ros/devel/lib/python3/dist-packages:$PYTHONPATH
 RUN pip3 install jupyter
 RUN pip3 install jupyterlab
 
@@ -46,15 +46,14 @@ RUN pip3 install --upgrade jupyter-server
 # We need the json_prolog_msgs to communicate with KnowRob
 USER root
 WORKDIR /home/ros/src
-# RUN /usr/bin/python /opt/ros/noetic/bin/catkin_init_workspace
-RUN /usr/conda/bin/python /opt/ros/noetic/bin/catkin_init_workspace
+RUN /usr/bin/python /opt/ros/noetic/bin/catkin_init_workspace
 RUN source /opt/ros/noetic/setup.bash
 RUN git clone https://github.com/code-iai/iai_common_msgs.git
 
 WORKDIR /home/ros
 # Build the catkin workspace
 ENV CMAKE_PREFIX_PATH=/home/${NB_USER}/knowrob_ws/devel:/opt/ros/noetic
-RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/conda/bin/python3
+RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
 WORKDIR /home/ros/lectures
 
