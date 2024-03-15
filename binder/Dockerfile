@@ -40,8 +40,8 @@ RUN git clone https://github.com/RoboStack/jupyter-ros.git
 WORKDIR ${JUPYTER_ROS}/jupyter-ros
 # RUN sudo apt update
 # RUN sudo apt install -y nodejs npm
-USER ${NB_USER}
 RUN pip install -e .
+USER ${NB_USER}
 RUN pip install numpy --upgrade
 RUN jupyter nbextension install --py --symlink --sys-prefix jupyros
 RUN jupyter nbextension enable --py --sys-prefix jupyros
