@@ -32,7 +32,7 @@ RUN pip install --upgrade \
   jupyterlab-language-pack-de-DE  \
   jupyterlab_execute_time
 
-
+USER root
 # Install jupyter-ros
 ENV JUPYTER_ROS = /home/${NB_USER}/workspace/jupyterros
 WORKDIR ${JUPYTER_ROS}
@@ -40,6 +40,7 @@ RUN git clone https://github.com/RoboStack/jupyter-ros.git
 WORKDIR ${JUPYTER_ROS}/jupyter-ros
 # RUN sudo apt update
 # RUN sudo apt install -y nodejs npm
+USER ${NB_USER}
 RUN pip install -e .
 RUN pip install numpy --upgrade
 RUN jupyter nbextension install --py --symlink --sys-prefix jupyros
