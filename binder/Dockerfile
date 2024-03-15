@@ -1,32 +1,36 @@
-FROM ros:noetic-ros-base-buster
+# FROM ros:noetic-ros-base-buster
+FROM intel4coro/base-notebook:20.04-noetic-full-xpra
+
 SHELL ["/bin/bash", "-c"] 
 
 USER root
 RUN apt update --fix-missing
-RUN apt install -y git m4 python python3-pip wget
+RUN apt install -y git m4 wget
+# RUN apt install -y git m4 python python3-pip wget
 RUN apt install -y python3-catkin-pkg-modules python3-rospkg-modules libffi-dev
 RUN apt update
 RUN apt install -y nodejs npm
 
 USER ${NB_USER}
 # Install and set path for python dependencies
-ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/ros/devel/lib/python3/dist-packages:$PYTHONPATH
-# RUN python3 -m pip install jupyterlab
-RUN pip3 install jupyter
-RUN pip3 install --upgrade \
-#   sidecar \
-#   Cython \
-#   openai \
+# ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/ros/devel/lib/python3/dist-packages:$PYTHONPATH
+RUN pip uninstall -y jlab-enhanced-cell-toolbar
+RUN pip install https://raw.githubusercontent.com/yxzhan/jupyterlab-rviz/master/dist/jupyterlab_rviz-0.3.2.tar.gz \
+  https://raw.githubusercontent.com/yxzhan/extension-examples/main/cell-toolbar/dist/jupyterlab_examples_cell_toolbar-0.1.4.tar.gz
+RUN mamba install -y ripgrep
+RUN pip install --upgrade \
+  sidecar \
+  Cython \
+  openai \
   jupyterlab-git \
   jupyterlab-unfold \
   jupyter-archive \
   jupyterlab-search-replace \
   jupyter-offlinenotebook \
-#   jupyter-collaboration \
-#   jupyter-ai \
+  jupyter-collaboration \
+  jupyter-ai \
   jupyterlab-language-pack-de-DE  \
   jupyterlab_execute_time
-
 
 
 # Install jupyter-ros
@@ -36,8 +40,8 @@ RUN git clone https://github.com/RoboStack/jupyter-ros.git
 WORKDIR ${JUPYTER_ROS}/jupyter-ros
 # RUN sudo apt update
 # RUN sudo apt install -y nodejs npm
-RUN pip3 install -e .
-RUN pip3 install numpy --upgrade
+RUN pip install -e .
+RUN pip install numpy --upgrade
 RUN jupyter nbextension install --py --symlink --sys-prefix jupyros
 RUN jupyter nbextension enable --py --sys-prefix jupyros
 
@@ -45,7 +49,7 @@ RUN jupyter nbextension enable --py --sys-prefix jupyros
 RUN python3 -m pip install jupyterlab-zethus
 
 # Install Knowrob kernel 
-RUN pip3 install git+https://github.com/sasjonge/jupyter-knowrob.git
+RUN pip install git+https://github.com/sasjonge/jupyter-knowrob.git
 WORKDIR ~/.local/share/jupyter/kernels/
 USER root
 RUN mkdir jknowrob
