@@ -41,6 +41,8 @@ RUN mkdir jknowrob
 USER ${NB_USER}
 RUN wget https://raw.githubusercontent.com/sasjonge/jupyter-knowrob/master/kernel.json -P ~/.local/share/jupyter/kernels/jknowrob
 
+RUN pip3 install --upgrade jupyter-server
+
 # We need the json_prolog_msgs to communicate with KnowRob
 USER root
 WORKDIR /home/ros/src
