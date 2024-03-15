@@ -1,8 +1,11 @@
 # FROM ros:noetic-ros-base-buster
 FROM python:3.8 AS stage1
 WORKDIR /rasaenv
+RUN pip install virtualenv
+RUN python -m venv venv
+ENV PATH=/rasaenv/venv/bin:$PATH
 RUN pip install rasa
-
+RUN unset PATH
 
 FROM intel4coro/base-notebook:20.04-noetic-full-xpra as stage2
 
@@ -13,7 +16,7 @@ USER root
 #copy stage 1 files
 WORKDIR /home/rasaenv
 
-COPY --from=stage1 --chown=${NB_USER}:users /rasaenv /home/rasaenv/
+COPY --from=stage1 --chown=${NB_USER}:users /rasaenv/venv /home/rasaenv/venv
 
 RUN apt update --fix-missing
 RUN apt install -y git m4 wget
