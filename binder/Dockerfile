@@ -25,7 +25,7 @@ RUN pip3 install jupyter
 #   jupyter-ai \
 #   jupyterlab-language-pack-de-DE  \
 #   jupyterlab_execute_time
-RUN pip3 install jupyterlab==4.0.0
+RUN pip3 install jupyterlab == 4.0.0a32
 
 
 # Install jupyter-ros
