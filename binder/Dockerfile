@@ -53,7 +53,7 @@ WORKDIR /home/ros
 ENV CMAKE_PREFIX_PATH=/home/${NB_USER}/knowrob_ws/devel:/opt/ros/noetic
 RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
-WORKDIR /lectures
+WORKDIR /home/ros/lectures
 
 # Configure container startup
 COPY --chown=${NB_USER}:users binder/run_notebook.sh /run_notebook.sh
