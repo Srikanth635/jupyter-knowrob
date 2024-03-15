@@ -23,7 +23,7 @@ RUN pip3 install --upgrade \
   jupyterlab-search-replace \
   jupyter-offlinenotebook \
 #   jupyter-collaboration \
-  jupyter-ai \
+#   jupyter-ai \
   jupyterlab-language-pack-de-DE  \
   jupyterlab_execute_time
 
