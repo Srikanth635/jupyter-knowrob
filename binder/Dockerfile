@@ -56,7 +56,7 @@ RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 WORKDIR /home/ros/lectures
 
 # Configure container startup
-COPY --chown=${NB_USER}:users binder/run_notebook.sh /run_notebook.sh
+COPY --chown=${NB_USER}:users binder/run_notebook.sh /home/ros/lectures/run_notebook.sh
 # RUN chmod +x /run_notebook.sh
 COPY --chown=${NB_USER}:users binder/knowrob_cloud /home/ros/src/knowrob_cloud
 # ENTRYPOINT ["/run_notebook.sh"]
