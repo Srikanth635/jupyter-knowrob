@@ -57,6 +57,6 @@ WORKDIR /lectures
 
 # Configure container startup
 COPY --chown=${NB_USER}:users binder/run_notebook.sh /run_notebook.sh
-RUN chmod +x /run_notebook.sh
+# RUN chmod +x /run_notebook.sh
 COPY --chown=${NB_USER}:users binder/knowrob_cloud /home/ros/src/knowrob_cloud
-ENTRYPOINT ["/run_notebook.sh"]
+# ENTRYPOINT ["/run_notebook.sh"]
