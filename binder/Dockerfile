@@ -46,7 +46,7 @@ RUN pip3 install --upgrade jupyter-server
 # We need the json_prolog_msgs to communicate with KnowRob
 USER root
 WORKDIR /home/ros/src
-RUN /usr/bin/python /opt/ros/noetic/bin/catkin_init_workspace
+RUN /usr/bin/python3 /opt/ros/noetic/bin/catkin_init_workspace
 RUN source /opt/ros/noetic/setup.bash
 RUN git clone https://github.com/code-iai/iai_common_msgs.git
 
