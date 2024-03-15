@@ -1,9 +1,20 @@
 # FROM ros:noetic-ros-base-buster
-FROM intel4coro/base-notebook:20.04-noetic-full-xpra
+FROM python:3.8 AS stage1
+WORKDIR /rasaenv
+RUN pip install rasa
+
+
+FROM intel4coro/base-notebook:20.04-noetic-full-xpra as stage2
 
 SHELL ["/bin/bash", "-c"] 
 
 USER root
+
+#copy stage 1 files
+WORKDIR /home/rasaenv
+
+COPY --from=stage1 --chown=${NB_USER}:users /rasaenv /home/rasaenv/
+
 RUN apt update --fix-missing
 RUN apt install -y git m4 wget
 # RUN apt install -y git m4 python python3-pip wget
