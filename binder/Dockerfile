@@ -1,78 +1,73 @@
-# FROM ros:noetic-ros-base-buster
-FROM python:3.8 AS stage1
-WORKDIR /rasaenv
-RUN pip install virtualenv
-RUN python -m venv venv
-ENV PATH=/rasaenv/venv/bin:$PATH
-RUN pip install rasa
-RUN unset PATH
+FROM intel4coro/base-notebook:20.04-noetic
 
-FROM intel4coro/base-notebook:20.04-noetic-full-xpra as stage2
-
-SHELL ["/bin/bash", "-c"] 
-
+# Install SWI Prolog
 USER root
+RUN apt install -y software-properties-common && \
+  apt-add-repository -y ppa:swi-prolog/stable
+RUN apt update && \
+  apt install -y swi-prolog
+ENV SWI_HOME_DIR=/usr/lib/swi-prolog
 
-#copy stage 1 files
-WORKDIR /home/rasaenv
+# Install MongoDB Community Edition
+ARG MONGODEB_VERSION=7.0
+RUN curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODEB_VERSION}.asc | \
+    gpg -o /usr/share/keyrings/mongodb-server-${MONGODEB_VERSION}.gpg --dearmor
+RUN echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODEB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/${MONGODEB_VERSION} multiverse" | \
+    tee /etc/apt/sources.list.d/mongodb-org-${MONGODEB_VERSION}.list
+RUN apt update && apt install -y mongodb-org
+RUN mkdir -p /data/db && \
+    chown -R ${NB_USER}:users /data/db
 
-COPY --from=stage1 --chown=${NB_USER}:users /rasaenv/venv /home/rasaenv/venv
-
-RUN apt update --fix-missing
-RUN apt install -y git m4 wget
-# RUN apt install -y git m4 python python3-pip wget
-RUN apt install -y python3-catkin-pkg-modules python3-rospkg-modules libffi-dev
-RUN apt update
-RUN apt install -y nodejs npm
-
+# Install Knowrob
 USER ${NB_USER}
-# Install and set path for python dependencies
-ENV PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/home/${NB_USER}/ros/devel/lib/python3/dist-packages:$PYTHONPATH
-RUN pip3 install jupyter
-RUN pip3 install jupyterlab
+ENV KNOWROB_WS=${HOME}/workspace/knowrob
+RUN mkdir -p ${KNOWROB_WS}/src
+WORKDIR ${KNOWROB_WS}/src
+RUN wstool init && \
+    wstool merge https://raw.github.com/knowrob/knowrob/master/rosinstall/knowrob-base.rosinstall && \
+    wstool update
 
+# Switch to root user to install ROS dependencies
 USER root
-# Install jupyter-ros
-WORKDIR /home/ros
-RUN git clone https://github.com/RoboStack/jupyter-ros.git
-WORKDIR /home/ros/jupyter-ros
-# RUN sudo apt update
-# RUN sudo apt install -y nodejs npm
-RUN pip3 install -e .
+RUN rosdep update && rosdep install -y -r --ignore-src --from-paths . && \
+    rosdep fix-permissions
+
+COPY --chown=${NB_USER}:users knowrob_cloud ${KNOWROB_WS}/src/knowrob_cloud
+COPY --chown=${NB_USER}:users prolog /prolog
+
+# Build catkin workspace
 USER ${NB_USER}
-RUN pip3 install numpy --upgrade
-RUN jupyter nbextension install --py --symlink --sys-prefix jupyros
-RUN jupyter nbextension enable --py --sys-prefix jupyros
+WORKDIR ${KNOWROB_WS}
+RUN source ${ROS_PATH}/setup.bash && catkin_make
 
-# Install jupyter-zethus
-RUN python3 -m pip install jupyterlab-zethus
+# Source knowrob workspace on a new bash shell
+RUN echo "source ${KNOWROB_WS}/devel/setup.bash" >> ${HOME}/.bashrc
 
-# Install Knowrob kernel 
-RUN pip3 install git+https://github.com/sasjonge/jupyter-knowrob.git
-WORKDIR ~/.local/share/jupyter/kernels/
-USER root
-RUN mkdir jknowrob
+# Install jupyter knowrob kernel
 USER ${NB_USER}
-RUN wget https://raw.githubusercontent.com/sasjonge/jupyter-knowrob/master/kernel.json -P ~/.local/share/jupyter/kernels/jknowrob
+COPY --chown=${NB_USER}:users . ${HOME}/jupyter-knowrob
+WORKDIR ${HOME}/jupyter-knowrob
+RUN pip install .
+COPY --chown=${NB_USER}:users ./kernel.json ${HOME}/.local/share/jupyter/kernels/jknowrob/kernel.json
 
-RUN pip3 install --upgrade jupyter-server
-
-# We need the json_prolog_msgs to communicate with KnowRob
+# Download the example_neem
 USER root
-WORKDIR /home/ros/src
-RUN /usr/bin/python3 /opt/ros/noetic/bin/catkin_init_workspace
-RUN source /opt/ros/noetic/setup.bash
-RUN git clone https://github.com/code-iai/iai_common_msgs.git
+RUN mkdir /neem_data && chown ${NB_USER}:users /neem_data
+USER ${NB_USER}
+RUN cd /neem_data && \
+    ln -s /neem_data ${HOME}/jupyter-knowrob/lectures/data && \
+    wget https://seafile.zfn.uni-bremen.de/f/b66a71b257084d459b6c/?dl=1 -O example_neem.zip && \
+    unzip example_neem.zip && \
+    mv example_neem/* ./ && \
+    rm -r example_neem example_neem.zip
 
-WORKDIR /home/ros
-# Build the catkin workspace
-ENV CMAKE_PREFIX_PATH=/home/${NB_USER}/knowrob_ws/devel:/opt/ros/noetic
-RUN /opt/ros/noetic/bin/catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+# jupyterlab interface configuration
+COPY --chown=${NB_USER}:users binder/jupyter-settings.json /opt/conda/share/jupyter/lab/settings/overrides.json
+COPY --chown=${NB_USER}:users binder/webapps.json ${ROS_WS}/src/rvizweb/webapps/app.json
 
-WORKDIR /home/ros/lectures
+# Entrypoint starting knowrob and mongodb
+COPY --chown=${NB_USER}:users binder/entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
 
-# Configure container startup
-COPY --chown=${NB_USER}:users binder/run_notebook.sh /home/ros/lectures/run_notebook.sh
-RUN chmod +x /home/ros/lectures/run_notebook.sh
-COPY --chown=${NB_USER}:users binder/knowrob_cloud /home/ros/src/knowrob_cloud
-# ENTRYPOINT ["/run_notebook.sh"]
+WORKDIR ${HOME}/jupyter-knowrob/lectures
+RUN ln -s ${KNOWROB_WS} ${PWD}/KNOWROB_WS
